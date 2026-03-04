@@ -1,0 +1,18 @@
+# Synapsa Budowlanka — Requirements (Base Layer)
+# Pełne AI biblioteki instalowane przez synapsa/install_helper.py (z wykrywaniem CPU/GPU)
+
+# UI
+streamlit>=1.32
+
+# Utilities
+psutil>=5.9
+requests>=2.31
+colorama>=0.4.6
+python-dotenv>=1.0
+
+# --- AI biblioteki (zainstaluj przez install_helper.py dla właściwego CUDA) ---
+# torch>=2.2
+# transformers>=4.40
+# peft>=0.10
+# bitsandbytes>=0.43
+# accelerate>=0.27

@@ -1,0 +1,74 @@
+# ============================================
+# Synapsa — .gitignore
+# ============================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# ============================================
+# SECRETS & SENSITIVE DATA
+# ============================================
+.env
+*.pickle
+*.key
+
+# ============================================
+# AI MODELS & LARGE FILES
+# ============================================
+moje_ai_adaptery/
+moje_ai_adaptery.zip
+*.jsonl
+*.jsonl.bak*
+unsloth_compiled_cache/
+
+# ML artifacts
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+
+# ============================================
+# GENERATED & TEMP FILES
+# ============================================
+synapsa_workspace/
+synapsa_memory/
+temp_audit/
+temp_sim_upload/
+demo_docs/
+data/
+
+# Distribution packages
+dist/
+dystrybucjaoffice/
+
+# Office files
+*.xlsx
+*.xls
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# Archives
+*.rar
+*.zip
+*.7z

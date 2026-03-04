@@ -1,0 +1,37 @@
+# Synapsa — Quantization Configuration
+# Used by SynapsaEngine to load the model in optimized mode
+#
+# Reference: https://huggingface.co/docs/transformers/main/en/quantization/bitsandbytes
+
+model:
+  base: "unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit"
+  adapter_path: "moje_ai_adaptery"
+
+quantization:
+  # NF4 = Normal Float 4-bit — better distribution coverage than INT4
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"
+
+  # FP16 compute for matrix multiplications (accuracy vs speed trade-off)
+  bnb_4bit_compute_dtype: "float16"
+
+  # Double quantization — quantize the quantization constants themselves
+  # Saves additional ~0.3 GB VRAM with negligible quality impact
+  bnb_4bit_use_double_quant: true
+
+inference:
+  max_new_tokens: 2048
+  temperature: 0.1
+  repetition_penalty: 1.1
+  use_cache: true
+
+# LoRA adapter configuration (for domain fine-tuning)
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"

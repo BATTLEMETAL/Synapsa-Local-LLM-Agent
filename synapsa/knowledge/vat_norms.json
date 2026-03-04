@@ -1,0 +1,287 @@
+{
+    "source": "Synapsa Knowledge Base — Normy VAT PL",
+    "version": "2026.2",
+    "years": {
+        "2018": {
+            "year": 2018,
+            "description": "Przed wdrożeniem split payment. Normalne faktury VAT.",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": null,
+            "ksef_required": false,
+            "important_notes": [
+                "Brak obowiązku dopisku o mechanizmie podzielonej płatności",
+                "Faktury papierowe OK",
+                "Faktury e-mail OK"
+            ]
+        },
+        "2019": {
+            "year": 2019,
+            "description": "Dobrowolny mechanizm podzielonej płatności (MPP) od 1 listopada 2019.",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": 15000,
+            "split_payment_note": "Mechanizm podzielonej płatności",
+            "ksef_required": false,
+            "important_notes": [
+                "Od 01.11.2019: obowiązkowy MPP dla wierzytelności >15000 PLN z załącznika nr 15",
+                "Obowiązkowy dopisek: 'Mechanizm podzielonej płatności'"
+            ]
+        },
+        "2020": {
+            "year": 2020,
+            "description": "Obowiązkowy MPP dla towarów/usług z załącznika nr 15.",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": 15000,
+            "split_payment_note": "Mechanizm podzielonej płatności",
+            "ksef_required": false,
+            "important_notes": [
+                "Obowiązkowy MPP: kwota brutto >15000 PLN + towary z zał. 15 do ustawy VAT",
+                "Można wstawić 'MPP' lub 'mechanizm podzielonej płatności'"
+            ]
+        },
+        "2021": {
+            "year": 2021,
+            "description": "Covid: Tarcze antyinflacyjne. Bez zmian w zasadach fakturowania.",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": 15000,
+            "split_payment_note": "Mechanizm podzielonej płatności",
+            "ksef_required": false,
+            "important_notes": [
+                "Bez zmian strukturalnych w fakturowaniu",
+                "Tarcze: możliwe zerowe stawki VAT na wybrane towary (spożywcze)"
+            ]
+        },
+        "2022": {
+            "year": 2022,
+            "description": "Tarcza antyinflacyjna: zerowy VAT na żywność i paliwa (czasowo).",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": 15000,
+            "split_payment_note": "Mechanizm podzielonej płatności",
+            "ksef_required": false,
+            "important_notes": [
+                "Zerowy VAT na żywność (01.02-31.07.2022)",
+                "Zerowy VAT na paliwa (01.02-31.07.2022)",
+                "KSeF dobrowolny"
+            ]
+        },
+        "2023": {
+            "year": 2023,
+            "description": "SLIM VAT 3 — uproszczenia. KSeF dobrowolny.",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": 15000,
+            "split_payment_note": "Mechanizm podzielonej płatności",
+            "ksef_required": false,
+            "ksef_voluntary": true,
+            "important_notes": [
+                "SLIM VAT 3: od 01.07.2023",
+                "KSeF dobrowolny — zalecany",
+                "Uproszczenie zasad korekt i paragonów"
+            ]
+        },
+        "2024": {
+            "year": 2024,
+            "description": "KSeF obowiązkowy dla dużych firm (>200mln PLN). Reszta: dobrowolny.",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto",
+                "numer KSeF (dla dużych firm)"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": 15000,
+            "split_payment_note": "Mechanizm podzielonej płatności",
+            "ksef_required": false,
+            "ksef_required_large_firms": true,
+            "ksef_voluntary": true,
+            "important_notes": [
+                "KSeF obowiązkowy od 01.07.2024 dla firm z obrotem >200mln PLN",
+                "Numer KSeF wymagany na fakturach od dużych firm"
+            ]
+        },
+        "2025": {
+            "year": 2025,
+            "description": "KSeF obowiązkowy dla WSZYSTKICH podatników VAT od 01.02.2026.",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": 15000,
+            "split_payment_note": "Mechanizm podzielonej płatności",
+            "ksef_required": false,
+            "ksef_voluntary": true,
+            "important_notes": [
+                "Przygotowanie do powszechnego KSeF",
+                "KSeF obowiązkowy od 01.02.2026",
+                "Zalecane wdrożenie KSeF w 2025"
+            ]
+        },
+        "2026": {
+            "year": 2026,
+            "description": "OBOWIĄZKOWY KSeF dla wszystkich podatników VAT od 01.02.2026.",
+            "required_fields": [
+                "data wystawienia",
+                "numer faktury",
+                "NIP sprzedawcy",
+                "NIP nabywcy",
+                "adres sprzedawcy",
+                "adres nabywcy",
+                "opis towaru/usługi",
+                "kwota netto",
+                "stawka VAT",
+                "kwota podatku VAT",
+                "kwota brutto",
+                "numer KSeF"
+            ],
+            "vat_rates": [
+                23,
+                8,
+                5,
+                0
+            ],
+            "split_payment_threshold_pln": 15000,
+            "split_payment_note": "Mechanizm podzielonej płatności",
+            "ksef_required": true,
+            "ksef_voluntary": false,
+            "important_notes": [
+                "KSeF obowiązkowy — BRAK numeru KSeF = BŁĄD FORMALNY",
+                "Faktury papierowe i e-mailowe NIE SĄ akceptowane dla B2B",
+                "Numer KSeF jest generowany przez system MF przy wystawieniu"
+            ]
+        }
+    }
+}

@@ -1,0 +1,35 @@
+# Synapsa — Docker Compose
+# One-command deployment: docker-compose up --build
+
+version: "3.9"
+
+services:
+  synapsa:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: synapsa-app
+    ports:
+      - "8501:8501"
+    volumes:
+      # Persist workspace data (invoices, knowledge, memory) across restarts
+      - synapsa_workspace:/app/synapsa_workspace
+      - synapsa_memory:/app/synapsa_memory
+      # Mount adapter weights from host (optional — for GPU inference)
+      - ./moje_ai_adaptery:/app/moje_ai_adaptery:ro
+    environment:
+      - ADAPTER_PATH=/app/moje_ai_adaptery
+      - MODEL_PATH=unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit
+      - MAX_SEQ_LENGTH=2048
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  synapsa_workspace:
+  synapsa_memory:
