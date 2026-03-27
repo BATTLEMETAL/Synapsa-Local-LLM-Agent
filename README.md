@@ -1,30 +1,60 @@
 # Synapsa: Autonomous Local LLM Agent
 
-**Synapsa** is a modular, offline-first AI agent system. No cloud. No privacy leaks.
+**Synapsa** is a modular, offline-first AI agent system running on consumer hardware.
+No cloud. No external API. No privacy leaks.
 
-## Key Achievement
-* -40% RAM usage via custom bitsandbytes NF4 patches on Windows
-* * Self-healing code loop (Ultimate Auditor) - agent tests and fixes its own output
-* * ChromaDB RAG memory - remembers project context
-* * Teacher-Student fine-tuning pipeline
+## Key Achievements
 
-* ## Tech Stack
-* * Model: Qwen 2.5 7B NF4 quantized
-* * Training: Unsloth + PEFT LoRA
-* * Memory: ChromaDB vector database
-* * Optimization: bitsandbytes, Triton
-* * Runtime: Python 3.10, PyTorch, HuggingFace
- 
-  * ## Quick Start
-  * git clone https://github.com/BATTLEMETAL/Synapsa-Local-LLM-Agent.git
-  * cd Synapsa-Local-LLM-Agent
-  * pip install -r requirements.txt
-  * python main.py
- 
-  * ## Roadmap
-  * * NF4 quantization + bitsandbytes patches (done)
-    * * ChromaDB RAG integration (done)
-      * * Self-healing Ultimate Auditor (done)
-        * * REST API wrapper (planned)
-          * * LangChain migration (planned)
-            * 
+- -40% RAM usage via custom Triton/bitsandbytes NF4 patches on Windows (non-WSL)
+- - Self-healing code loop (Ultimate Auditor) - agent tests and fixes its own output
+  - - ChromaDB RAG memory - agent remembers project context between sessions
+    - - Teacher-Student fine-tuning - Gemini/Groq generates CoT training data for local model
+     
+      - ## Architecture
+     
+      - ```
+        +------------------------------------------+
+        |              Synapsa Core                |
+        +-------------------+----------------------+
+        |    Orchestrator   |   ChromaDB Memory    |
+        |    (Qwen NF4)    |   (Vector RAG)       |
+        +-------------------+----------------------+
+        |  Ultimate Auditor |  Fine-tune Pipeline  |
+        |  (self-healing)   |  (Unsloth + PEFT)   |
+        +-------------------+----------------------+
+                 runs fully offline
+            NVIDIA RTX 3060 - 12GB VRAM
+        ```
+
+        ## Tech Stack
+
+        | Component | Technology |
+        |---|---|
+        | Model | Qwen 2.5 7B (fine-tuned, NF4 quantized) |
+        | Training | Unsloth + PEFT (LoRA) |
+        | Vector Memory | ChromaDB |
+        | Optimization | bitsandbytes, Triton (custom Windows patches) |
+        | Runtime | Python 3.10+, PyTorch, HuggingFace Transformers |
+
+        ## Quick Start
+
+        ```bash
+        git clone https://github.com/BATTLEMETAL/Synapsa-Local-LLM-Agent.git
+        cd Synapsa-Local-LLM-Agent
+        python -m venv venv
+        venv\Scripts\activate
+        pip install -r requirements.txt
+        python main.py
+        ```
+
+        Requirements: Python 3.10+, NVIDIA GPU 8GB+ VRAM, CUDA 11.8+
+
+        ## Roadmap
+
+        - [x] NF4 quantization + Windows bitsandbytes patches
+        - [x] ChromaDB RAG memory integration
+        - [x] Self-healing Ultimate Auditor module
+        - [x] Teacher-Student CoT fine-tune pipeline
+        - [ ] REST API wrapper for enterprise integration
+        - [ ] LangChain/LangGraph migration
+        - [ ] 
