@@ -53,8 +53,8 @@ No cloud. No external API. No privacy leaks.
 
         - [x] NF4 quantization + Windows bitsandbytes patches
         - [x] ChromaDB RAG memory integration
-        - [x] Self-healing Ultimate Auditor module
-        - [x] Teacher-Student CoT fine-tune pipeline
+   - [x]      Self-healing Ultimate Auditor module
+   - [x]      Teacher-Student CoT fine-tune pipeline
         - [ ] REST API wrapper for enterprise integration
         - [ ] LangChain/LangGraph migration
         - [ ] 
