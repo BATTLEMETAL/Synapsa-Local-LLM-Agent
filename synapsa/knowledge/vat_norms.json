@@ -1,6 +1,6 @@
 {
     "source": "Synapsa Knowledge Base — Normy VAT PL",
-    "version": "2026.2",
+    "version": "2026.3",
     "years": {
         "2018": {
             "year": 2018,
@@ -187,7 +187,7 @@
         },
         "2024": {
             "year": 2024,
-            "description": "KSeF obowiązkowy dla dużych firm (>200mln PLN). Reszta: dobrowolny.",
+            "description": "KSeF odroczony. Powrót wyższej stawki VAT 5% na żywność.",
             "required_fields": [
                 "data wystawienia",
                 "numer faktury",
@@ -199,8 +199,7 @@
                 "kwota netto",
                 "stawka VAT",
                 "kwota podatku VAT",
-                "kwota brutto",
-                "numer KSeF (dla dużych firm)"
+                "kwota brutto"
             ],
             "vat_rates": [
                 23,
@@ -211,16 +210,16 @@
             "split_payment_threshold_pln": 15000,
             "split_payment_note": "Mechanizm podzielonej płatności",
             "ksef_required": false,
-            "ksef_required_large_firms": true,
+            "ksef_required_large_firms": false,
             "ksef_voluntary": true,
             "important_notes": [
-                "KSeF obowiązkowy od 01.07.2024 dla firm z obrotem >200mln PLN",
-                "Numer KSeF wymagany na fakturach od dużych firm"
+                "KSeF ZOSTAŁ ODROCZONY do 2026. W 2024 roku pozostaje dobrowolny.",
+                "Zakończenie tarczy inflacyjnej: VAT 5% na żywność wraca od 01.04.2024"
             ]
         },
         "2025": {
             "year": 2025,
-            "description": "KSeF obowiązkowy dla WSZYSTKICH podatników VAT od 01.02.2026.",
+            "description": "Rok przygotowawczy do wejścia w życie KSeF. Całkowicie dobrowolny w każdym profilu działalności.",
             "required_fields": [
                 "data wystawienia",
                 "numer faktury",
@@ -245,14 +244,13 @@
             "ksef_required": false,
             "ksef_voluntary": true,
             "important_notes": [
-                "Przygotowanie do powszechnego KSeF",
-                "KSeF obowiązkowy od 01.02.2026",
-                "Zalecane wdrożenie KSeF w 2025"
+                "KSeF całkowicie dobrowolny w całym 2025 roku.",
+                "Czas dla przedsiębiorstw na dostosowanie i integrację z bramkami Ministerstwa Finansów"
             ]
         },
         "2026": {
             "year": 2026,
-            "description": "OBOWIĄZKOWY KSeF dla wszystkich podatników VAT od 01.02.2026.",
+            "description": "OBOWIĄZKOWY KSeF wedle nowej legislacji odrzuconej w 2024.",
             "required_fields": [
                 "data wystawienia",
                 "numer faktury",
@@ -278,9 +276,10 @@
             "ksef_required": true,
             "ksef_voluntary": false,
             "important_notes": [
-                "KSeF obowiązkowy — BRAK numeru KSeF = BŁĄD FORMALNY",
-                "Faktury papierowe i e-mailowe NIE SĄ akceptowane dla B2B",
-                "Numer KSeF jest generowany przez system MF przy wystawieniu"
+                "Od 01.02.2026 obowiązek dla firm > 200 mln PLN",
+                "Od 01.04.2026 powszechny obowiązek KSeF dla MŚP",
+                "Faktury papierowe i PDF dla B2B przestają być ważne prawnie.",
+                "Brak numeru KSeF oznacza fakturę wadliwą."
             ]
         }
     }

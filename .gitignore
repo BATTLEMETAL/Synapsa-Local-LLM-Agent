@@ -72,3 +72,16 @@ Thumbs.db
 *.rar
 *.zip
 *.7z
+
+# ============================================
+# INTERNAL / NOT FOR PUBLIC REPO
+# ============================================
+Jarvis_PC/
+pocosiepchasz/
+RAPORT_SENIORA.md
+RAPORT_HARDCORE.md
+RAPORT_WIEDZY.md
+RAPORT_EWALUACJI.md
+RAPORT_GOTOWOSCI.md
+pomysly_na_agenty.txt
+lekcje_bezpieczenstwa.txt

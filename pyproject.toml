@@ -4,11 +4,11 @@ build-backend = "setuptools.backends._legacy:_Backend"
 
 [project]
 name = "synapsa"
-version = "1.0.0"
+version = "1.1.0"
 description = "Autonomous, self-improving AI Engineering ecosystem for local deployment"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     {name = "Synapsa Team"},
 ]
@@ -16,39 +16,42 @@ keywords = ["ai", "llm", "agents", "rag", "local-inference", "quantization"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
 dependencies = [
-    "streamlit>=1.32",
+    "streamlit>=1.42",
     "psutil>=5.9",
     "requests>=2.31",
     "colorama>=0.4.6",
     "python-dotenv>=1.0",
+    "pymupdf>=1.24",         # PDF/Image OCR — kluczowe dla audytu faktur
+    "openpyxl>=3.1",         # Czytanie plikow Excel
+    "reportlab>=4.0",        # Generowanie PDF raportow
 ]
 
 [project.optional-dependencies]
 gpu = [
-    "torch>=2.2",
-    "transformers>=4.40",
-    "peft>=0.10",
-    "bitsandbytes>=0.43",
-    "accelerate>=0.27",
+    "torch>=2.6",
+    "transformers>=4.49",
+    "peft>=0.15",
+    "bitsandbytes>=0.45",
+    "accelerate>=0.34",
+    "flash-attn>=2.7",       # 20-40% szybsza inferencja na Ampere+
 ]
 rag = [
-    "chromadb>=0.4",
-    "sentence-transformers>=2.2",
+    "chromadb>=0.6",
+    "sentence-transformers>=3.0",
 ]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.1",
     "black>=24.0",
     "isort>=5.13",
-    "ruff>=0.3",
-    "mypy>=1.8",
+    "ruff>=0.9",
+    "mypy>=1.10",
     "pre-commit>=3.6",
 ]
 all = ["synapsa[gpu,rag,dev]"]

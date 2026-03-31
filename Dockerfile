@@ -4,13 +4,14 @@
 # ============================================================
 
 # Stage 1: Builder — install dependencies
-FROM python:3.10-slim AS builder
+# Opcja GPU: FROM nvidia/cuda:12.6.0-devel-ubuntu22.04 AS builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /build
 
-# System dependencies for compilation
+# System dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc g++ && \
+    apt-get install -y --no-install-recommends gcc g++ libgl1 libglib2.0-0 && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy dependency specification
@@ -21,7 +22,8 @@ COPY synapsa/ ./synapsa/
 RUN pip install --no-cache-dir --prefix=/install .
 
 # Stage 2: Runtime — lean production image
-FROM python:3.10-slim AS runtime
+# Opcja GPU: FROM nvidia/cuda:12.6.0-runtime-ubuntu22.04 AS runtime
+FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 

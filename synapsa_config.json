@@ -1,0 +1,13 @@
+{
+    "profile": "HIGH_PERFORMANCE",
+    "description": "GPU-optimized: 7B 4-bit, balanced context (RTX 3060/3070)",
+    "tier": "HIGH_PERFORMANCE",
+    "device": "cuda",
+    "max_seq_length": 4096,
+    "batch_size": 2,
+    "model_size": "7b",
+    "quantization": "4bit",
+    "context_window": 4096,
+    "gpu_layers": -1,
+    "cpu_offload": true
+}

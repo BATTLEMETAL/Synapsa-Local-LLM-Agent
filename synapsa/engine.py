@@ -146,6 +146,55 @@ class SynapsaEngine:
         except Exception as e:
             return f"[Błąd generowania: {e}]"
 
+    def generate_chat(self, system_message: str, user_message: str, max_tokens: int = None) -> str:
+        """
+        [MODERNIZACJA] Generuje odpowiedź w formacie ChatML — prawidłowy format dla Qwen 2.5+.
+        Znacznie lepsze wyniki niż stały format Instruction/Response.
+        """
+        if not self._loaded:
+            self._load_model()
+
+        max_tokens = max_tokens or self._max_new_tokens
+
+        if self.model and self.tokenizer:
+            return self._generate_with_chatml(system_message, user_message, max_tokens)
+        else:
+            # Offline fallback — przekazujemy połączony prompt
+            return self._generate_offline(f"{system_message}\n\n{user_message}")
+
+    def _generate_with_chatml(self, system_message: str, user_message: str, max_tokens: int) -> str:
+        """Generuje z prawdziwym modelem używając ChatML — natywny format Qwen 2.5."""
+        try:
+            import torch
+            messages = [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message},
+            ]
+            # apply_chat_template automatycznie buduje poprawny format <|im_start|>
+            formatted = self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+            inputs = self.tokenizer([formatted], return_tensors="pt").to("cuda")
+            input_length = inputs["input_ids"].shape[1]
+
+            with torch.no_grad():
+                outputs = self.model.generate(
+                    **inputs,
+                    max_new_tokens=max_tokens,
+                    use_cache=True,
+                    temperature=0.2,
+                    do_sample=True,
+                    repetition_penalty=1.1,
+                    pad_token_id=self.tokenizer.eos_token_id,
+                )
+            # Dekoduj TYLKO nowe tokeny (nie powtarzaj promptu)
+            generated_tokens = outputs[0][input_length:]
+            return self.tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
+        except Exception as e:
+            return f"[Błąd generowania ChatML: {e}]"
+
     def _generate_offline(self, prompt: str) -> str:
         """
         Tryb offline - deterministyczne odpowiedzi.

@@ -1,0 +1,32 @@
+Synapsa AI — Professional Edition
+=================================
+
+Dziękujemy za wybór Synapsa AI.
+
+JAK URUCHOMIĆ (Quick Start):
+---------------------------
+1. Upewnij się, że masz zainstalowany Python 3.10 lub nowszy.
+   (Pobierz z: https://www.python.org/downloads/)
+
+2. W zależności od posiadanej wersji, kliknij dwukrotnie plik:
+   >> START_BUDOWLANKA.bat << lub >> START_OFFICE.bat <<
+
+3. System automatycznie:
+   - Stworzy bezpieczne środowisko (venv).
+   - Zainstaluje wymagane biblioteki AI (przy pierwszym uruchomieniu zajmie to kilka minut i dociągnie kilka GB danych).
+   - Wykryje Twój sprzęt (GPU/RAM) i dostosuje optymalny profil (np. HIGH_PERFORMANCE dla RTX 3060).
+   - Uruchomi aplikację bezpośrednio w Twojej przeglądarce internetowej na porcie 8501.
+
+KONFIGURACJA:
+------------
+Po pierwszym uruchomieniu w folderze pojawi się plik `.env`.
+Możesz go edytować notatnikiem, aby dodać klucze API (Gemini/Groq) dla pełnej funkcjonalności.
+
+WYMAGANIA:
+---------
+- System: Windows 10/11
+- Python: 3.10+
+- RAM: Min. 8GB (Zalecane 16GB+)
+- GPU: NVIDIA RTX (Zalecane) dla szybszego działania, ale działa też na CPU.
+
+Wsparcie: kontakt@synapsa.ai
