@@ -1,12 +1,14 @@
 """
 Test Historical Norms
-Verifies if SecureAuditAgent picks correct norms for 2018 vs 2026.
+Verifies that SecureAuditAgent selects the correct VAT/legal norms
+based on invoice date (2018 vs 2026 regulatory regime).
 """
 import os
 import sys
+import pytest
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from synapsa.agents.office_agent import SecureAuditAgent
 
@@ -23,28 +25,44 @@ class MockEngineNorms:
         return '{"status": "ERROR", "komentarz": "Złe normy."}'
 
 
-def test_norms():
-    print("TEST: Historical Norms Selection")
+@pytest.fixture
+def agent():
+    """SecureAuditAgent wired with a deterministic mock engine."""
+    return SecureAuditAgent(engine=MockEngineNorms())
 
-    # Setup agent with mock engine (bypass real LLM for logic check)
-    agent = SecureAuditAgent(engine=MockEngineNorms())
 
-    # 1. Test 2018
-    print("--> Testing 2018 Invoice...")
-    res_2018 = agent._generate_audit_plan("Sprawdź fakturę z datą 2018-05-12", ["invoice.pdf"])
-    if "2018" in res_2018:
-        print("✅ 2018 Norms Detected")
-    else:
-        print(f"❌ Failed 2018: {res_2018}")
+class TestHistoricalNormsSelection:
+    """Verifies that the agent applies the correct regulatory norms by year."""
 
-    # 2. Test 2026
-    print("--> Testing 2026 Invoice...")
-    res_2026 = agent._generate_audit_plan("Faktura z 2026 roku", ["invoice.pdf"])
-    if "2026" in res_2026:
-        print("✅ 2026 Norms Detected")
-    else:
-        print(f"❌ Failed 2026: {res_2026}")
+    def test_2018_norms_detected(self, agent):
+        """Invoice dated 2018 must trigger the 2018 regulatory norms."""
+        result = agent._generate_audit_plan("Sprawdź fakturę z datą 2018-05-12", ["invoice.pdf"])
+        assert "2018" in result, (
+            f"Expected '2018' norms in response, got: {result!r}"
+        )
+
+    def test_2026_norms_detected(self, agent):
+        """Invoice dated 2026 must trigger the 2026 regulatory norms (KSeF era)."""
+        result = agent._generate_audit_plan("Faktura z 2026 roku", ["invoice.pdf"])
+        assert "2026" in result, (
+            f"Expected '2026' norms in response, got: {result!r}"
+        )
+
+    def test_result_is_string(self, agent):
+        """Audit plan output must always be a string."""
+        result = agent._generate_audit_plan("Faktura z 2026 roku", ["invoice.pdf"])
+        assert isinstance(result, str), f"Expected str, got {type(result)}"
+
+    def test_2018_does_not_return_error(self, agent):
+        """2018 norms path should not return an ERROR status."""
+        result = agent._generate_audit_plan("Sprawdź fakturę z datą 2018-05-12", ["invoice.pdf"])
+        assert "ERROR" not in result, f"Unexpected ERROR in 2018 norms result: {result!r}"
+
+    def test_2026_does_not_return_error(self, agent):
+        """2026 norms path should not return an ERROR status."""
+        result = agent._generate_audit_plan("Faktura z 2026 roku", ["invoice.pdf"])
+        assert "ERROR" not in result, f"Unexpected ERROR in 2026 norms result: {result!r}"
 
 
 if __name__ == "__main__":
-    test_norms()
+    pytest.main([__file__, "-v"])

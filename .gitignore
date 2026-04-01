@@ -85,3 +85,17 @@ RAPORT_EWALUACJI.md
 RAPORT_GOTOWOSCI.md
 pomysly_na_agenty.txt
 lekcje_bezpieczenstwa.txt
+
+# ============================================
+# STRAY / GENERATED FILES
+# ============================================
+4.31.0
+*.bat
+test_faktura.txt
+check_gpu_verify.py
+pack_master.py
+pkg_budowlanka.py
+pkg_synapsa_office.py
+requirements_office.txt
+TestSkutecznosci.py
+triton_dummy_test_v2.py
