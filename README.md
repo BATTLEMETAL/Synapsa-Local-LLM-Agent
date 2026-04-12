@@ -50,12 +50,12 @@ Built around **Qwen 2.5 7B** with custom NF4 quantization and a proprietary Trit
 
 | Agent | File | Role |
 |---|---|---|
-| **Ultimate Auditor** | `Audytor_Ultimate.py` | Invoice parsing, JSON extraction, self-healing loop |
-| **Auditor Hybrid** | `Audytor_Hybrid.py` | Multi-mode inference (local + cloud fallback) |
+| **Ultimate Auditor** | `AuditorUltimate.py` | Invoice parsing, JSON extraction, self-healing loop |
+| **Auditor Hybrid** | `AuditorHybrid.py` | Multi-mode inference (local + cloud fallback) |
 | **Sensei** | `Sensei.py` | Knowledge consolidation, ChromaDB write path |
-| **Nauczyciel** | `Nauczyciel.py` | Teacher agent — generates synthetic training data |
-| **Skaner Ekspercki** | `Skaner_Ekspercki.py` | Document scanning and structural analysis |
-| **Obserwator** | `Obserwator.py` | System monitoring and performance tracking |
+| **Instructor** | `Instructor.py` | Teacher agent — generates synthetic training data |
+| **Expert Scanner** | `ExpertScanner.py` | Document scanning and structural analysis |
+| **Observer** | `Observer.py` | System monitoring and performance tracking |
 | **Koder** | `koder.py` | Code generation agent |
 
 ---
@@ -148,7 +148,10 @@ Synapsa/
 ├── api.py                   # FastAPI REST API
 ├── app_ksiegowosc.py        # Streamlit UI — accounting
 ├── app_budowlanka.py        # Streamlit UI — construction
-├── Audytor_Ultimate.py      # Self-healing invoice auditor
+├── AuditorUltimate.py       # Self-healing invoice auditor
+├── Instructor.py            # Teacher agent (synthetic data generation)
+├── Observer.py              # System monitoring agent
+├── ExpertScanner.py         # Document scanning and structural analysis
 ├── trener.py                # Interactive LoRA fine-tuning
 ├── trener_nocny.py          # Overnight fine-tuning runner
 ├── Dockerfile               # Container definition
