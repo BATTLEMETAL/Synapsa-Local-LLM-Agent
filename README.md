@@ -20,7 +20,7 @@ Built around **Qwen 2.5 7B** with custom NF4 quantization and a proprietary Trit
 | 🔧 **Custom Triton patches** | Solved `AttributeError: triton.cdiv` crash on Windows — no upstream fix exists |
 | 💾 **−68% VRAM usage** | From ~14.2 GB (FP16) → ~4.5 GB (NF4 + patches) on RTX 3060 |
 | 🔁 **Self-healing code loop** | Ultimate Auditor agent iteratively tests and repairs its own output |
-| 🧠 **ChromaDB RAG memory** | Persistent vector memory — agents remember project context across sessions |
+| 🧠 **Modular RAG extension** | ChromaDB vector memory available via `pip install synapsa[rag]` — optional extension for persistent context |
 | 🎓 **Teacher-Student fine-tuning** | Gemini/Groq generates synthetic CoT data; local model learns from it (LoRA) |
 | 🏭 **Production REST API** | FastAPI wrapper with `/health`, `/audit/invoice`, `/info` endpoints |
 | 🐳 **Docker-ready** | Full `Dockerfile` + `docker-compose.yml` for deployment |
@@ -33,8 +33,8 @@ Built around **Qwen 2.5 7B** with custom NF4 quantization and a proprietary Trit
 ┌─────────────────────────────────────────────────────────┐
 │                    Synapsa Core                         │
 ├──────────────────────┬──────────────────────────────────┤
-│   Orchestrator       │   ChromaDB Vector Memory         │
-│   (Qwen 2.5 7B NF4) │   (RAG — persistent context)    │
+│   Orchestrator       │   Knowledge Store                │
+│   (Qwen 2.5 7B NF4) │   (JSON core / ChromaDB [rag])  │
 ├──────────────────────┼──────────────────────────────────┤
 │   Ultimate Auditor   │   Teacher–Student Fine-tune      │
 │   (self-healing)     │   (Unsloth + PEFT LoRA)         │
@@ -52,7 +52,7 @@ Built around **Qwen 2.5 7B** with custom NF4 quantization and a proprietary Trit
 |---|---|---|
 | **Ultimate Auditor** | `AuditorUltimate.py` | Invoice parsing, JSON extraction, self-healing loop |
 | **Auditor Hybrid** | `AuditorHybrid.py` | Multi-mode inference (local + cloud fallback) |
-| **Sensei** | `Sensei.py` | Knowledge consolidation, ChromaDB write path |
+| **Sensei** | `Sensei.py` | Teacher-Student orchestrator — calls Gemini/Groq to generate synthetic CoT training data for local LoRA fine-tuning |
 | **Instructor** | `Instructor.py` | Teacher agent — generates synthetic training data |
 | **Expert Scanner** | `ExpertScanner.py` | Document scanning and structural analysis |
 | **Observer** | `Observer.py` | System monitoring and performance tracking |
@@ -108,7 +108,7 @@ streamlit run app_ksiegowosc.py
 | **Quantization** | bitsandbytes 0.43+ (4-bit NF4) |
 | **Windows compat** | Custom Triton mock layer (`triton_patches/`) |
 | **Fine-tuning** | Unsloth + PEFT (LoRA) |
-| **Vector Memory** | ChromaDB |
+| **Vector Memory** | ChromaDB *(optional — `pip install synapsa[rag]`)* |
 | **API** | FastAPI + Uvicorn |
 | **UI** | Streamlit |
 | **Containerization** | Docker + docker-compose |
@@ -123,7 +123,7 @@ streamlit run app_ksiegowosc.py
 pytest tests/ -v --tb=short
 ```
 
-Tests cover business logic norms, invoice parsing, and agent interface contracts — designed to run headlessly in CI (no GPU required).
+**38 tests** across business logic norms, invoice parsing (including Polish VAT edge cases), and agent interface contracts — designed to run headlessly in CI (no GPU required).
 
 ---
 
@@ -163,7 +163,7 @@ Synapsa/
 ## 📋 Roadmap
 
 - [x] NF4 quantization + Windows bitsandbytes patches
-- [x] ChromaDB RAG memory integration
+- [x] ChromaDB RAG extension (optional `[rag]` install)
 - [x] Self-healing "Ultimate Auditor" module
 - [x] Teacher-Student CoT fine-tune pipeline
 - [x] REST API wrapper (FastAPI)
