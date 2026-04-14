@@ -11,6 +11,8 @@
 
 Built around **Qwen 2.5 7B** with custom NF4 quantization and a proprietary Triton compatibility layer that enables stable inference on Windows (where official Triton support does not exist).
 
+> **In active production use:** Synapsa serves as the AI engine for [Shortsyt](https://github.com/BATTLEMETAL/Shortsyt) — an autonomous YouTube Shorts pipeline that has generated **15,130+ views** and published **75+ videos** since March 2026, with zero human intervention.
+
 ---
 
 ## ✨ Key Achievements
@@ -41,10 +43,26 @@ Built around **Qwen 2.5 7B** with custom NF4 quantization and a proprietary Trit
 ├──────────────────────┼──────────────────────────────────┤
 │   FastAPI REST API   │   Streamlit UIs                  │
 │   (enterprise layer) │   (accounting + construction)   │
-└──────────────────────┴──────────────────────────────────┘
+└─────────────────────────────────────────────────────────┘
             │ Runs fully offline — no internet required │
                   NVIDIA RTX 3060 · 12 GB VRAM
 ```
+
+### Cross-Project Integration (IPC Bridge)
+
+Synapsa also serves as the **AI backend for [Shortsyt](https://github.com/BATTLEMETAL/Shortsyt)**. Shortsyt runs in its own lightweight venv and calls Synapsa via a cross-venv IPC bridge:
+
+```python
+# shortsyt/synapsa_bridge.py — cross-venv LLM call
+def generate_viral_script_with_synapsa(context, topic):
+    if not _check_vram_available(min_gb=4.5):  # nvidia-smi guard
+        return use_fallback_script()
+    os.environ["SYNAPSA_CONTEXT_PAYLOAD"] = "|".join(context)  # bypass Windows arg limit
+    result = subprocess.run([SYNAPSA_PYTHON, "bridge.py"], timeout=300, capture_output=True)
+    return json.loads(result.stdout.strip().split('\n')[-1])
+```
+
+This pattern demonstrates: VRAM-aware model loading, cross-process JSON protocol, 300s timeout guard, and graceful fallback to 30 curated scripts.
 
 ### Agent Roster
 
@@ -143,13 +161,18 @@ pytest tests/ -v --tb=short
 Synapsa/
 ├── triton_patches/          # Custom Windows Triton compatibility layer ⭐
 ├── synapsa/                 # Core package (importable)
-├── agents/                  # Agent modules
-├── tests/                   # pytest test suite (CI-ready)
+│   ├── engine.py             #   Singleton inference engine — lazy load, ChatML, NF4 ⭐
+│   ├── hardware.py           #   Auto hardware scan + profile generation
+│   └── agents/               #   Agent base classes
+├── agents/                  # Domain-specific agents
+│   ├── accountant_agent.py   #   Invoice auditing, Polish VAT rules, JSON knowledge store
+│   └── construction_agent.py #   Construction cost estimation, offline knowledge base
+├── tests/                   # pytest test suite (CI-ready, 38 tests)
 ├── api.py                   # FastAPI REST API
 ├── app_ksiegowosc.py        # Streamlit UI — accounting
 ├── app_budowlanka.py        # Streamlit UI — construction
-├── AuditorUltimate.py       # Self-healing invoice auditor
-├── Instructor.py            # Teacher agent (synthetic data generation)
+├── AuditorUltimate.py       # Self-healing invoice auditor loop
+├── Instructor.py            # Teacher agent (synthetic CoT data generation)
 ├── Observer.py              # System monitoring agent
 ├── ExpertScanner.py         # Document scanning and structural analysis
 ├── trener.py                # Interactive LoRA fine-tuning
@@ -176,7 +199,8 @@ Synapsa/
 
 ## 🤝 Related Projects
 
-- [SalesBot](https://github.com/BATTLEMETAL/SalesBot) — AI-powered sales analytics pipeline with ML forecasting
+- [Shortsyt](https://github.com/BATTLEMETAL/Shortsyt) — **Active consumer of Synapsa's LLM engine.** Autonomous YouTube Shorts factory: Synapsa generates scripts via IPC bridge, pipeline publishes daily. 15,130+ total views, 75+ videos.
+- [SalesBot](https://github.com/BATTLEMETAL/SalesBot) — Automated Excel→PDF sales report pipeline with 12 pytest tests and GitHub Actions CI.
 
 ---
 
