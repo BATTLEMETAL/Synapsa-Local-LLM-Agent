@@ -11,7 +11,7 @@
 
 Built around **Qwen 2.5 7B** with custom NF4 quantization and a proprietary Triton compatibility layer that enables stable inference on Windows (where official Triton support does not exist).
 
-> **In active production use:** Synapsa serves as the AI engine for [Shortsyt](https://github.com/BATTLEMETAL/Shortsyt) — an autonomous YouTube Shorts pipeline that has generated **15,130+ views** and published **75+ videos** since March 2026, with zero human intervention.
+> **In active production use:** Synapsa serves as the AI engine for [Shortsyt](https://github.com/BATTLEMETAL/Shortsyt) — an autonomous YouTube Shorts pipeline that has generated **15,130+ views** and published **85+ videos** over 58+ consecutive days since March 2026, with zero human intervention.
 
 ---
 
@@ -218,8 +218,9 @@ Synapsa/
 
 ## 🤝 Related Projects
 
-- [Shortsyt](https://github.com/BATTLEMETAL/Shortsyt) — **Active consumer of Synapsa's LLM engine.** Autonomous YouTube Shorts factory: Synapsa generates scripts via IPC bridge, pipeline publishes daily. 15,130+ total views, 75+ videos.
-- [SalesBot](https://github.com/BATTLEMETAL/SalesBot) — Automated Excel→PDF sales report pipeline with 12 pytest tests and GitHub Actions CI.
+- [Shortsyt](https://github.com/BATTLEMETAL/Shortsyt) — **Active consumer of Synapsa's LLM engine.** Autonomous YouTube Shorts factory: Synapsa generates scripts via IPC bridge, pipeline publishes daily. 15,130+ total views, **85+ videos**, 58+ consecutive days.
+- [SalesBot](https://github.com/BATTLEMETAL/SalesBot) — Excel→AI-summary→PDF sales report pipeline. OpenAI GPT-4o-mini executive summary embedded in PDF, 12 pytest tests, GitHub Actions CI.
+- [CineMatch](https://github.com/BATTLEMETAL/CineMatch) — Android movie recommendation app with OpenAI GPT chat, TMDB + OMDB + Firebase + Room DB.
 
 ---
 
