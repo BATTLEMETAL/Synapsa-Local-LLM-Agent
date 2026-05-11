@@ -15,6 +15,24 @@ Built around **Qwen 2.5 7B** with custom NF4 quantization and a proprietary Trit
 
 ---
 
+## 📸 Live Demo
+
+**Invoice Audit — GDPR-safe, 100% offline, detects KSeF errors automatically:**
+
+| ✅ Valid Invoice | ❌ Invoice with Errors |
+|---|---|
+| ![Valid invoice result](docs/screenshots/OK__C_result_top.png) | ![Error invoice result](docs/screenshots/ERR_C_result_top.png) |
+
+**VRAM Benchmark — Custom Triton patches make 7B model fit on RTX 3060:**
+
+![VRAM Benchmark](docs/screenshots/vram_benchmark.png)
+
+> 🎬 **Video demos** (Full HD, real app recording):
+> - [📹 Invoice Audit Demo](docs/screenshots/DEMO_synapsa_invoice_audit.webm) — uploads invoice → shows valid/error result
+> - [📹 Budowlanka Demo](docs/screenshots/DEMO_budowlanka_invoice.webm) — natural language → cost estimate → invoice
+
+---
+
 ## ✨ Key Achievements
 
 | Achievement | Detail |

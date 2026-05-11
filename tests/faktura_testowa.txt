@@ -1,0 +1,35 @@
+FAKTURA VAT Nr FV/2026/05/0042
+
+Wystawca:
+  TECH SOLUTIONS SP. Z O.O.
+  ul. Innowacyjna 15
+  00-001 Warszawa
+  NIP: 123-456-78-90
+
+Nabywca:
+  BIURO RACHUNKOWE "PRECYZJA"
+  ul. Księgowa 8/12
+  30-001 Kraków
+  NIP: 987-654-32-10
+
+Data wystawienia: 10.05.2026
+Data sprzedaży: 09.05.2026
+Termin płatności: 24.05.2026
+
+Lp. | Nazwa usługi              | Jedn. | Ilość | Cena netto | Netto    | VAT 23% | Brutto
+1   | Licencja systemu Synapsa  | mies. | 1     | 1000,00    | 1000,00  | 230,00  | 1230,00
+2   | Wdrożenie i konfiguracja  | godz. | 4     | 250,00     | 1000,00  | 230,00  | 1230,00
+
+Razem:
+  Netto: 2000,00 PLN
+  VAT 23%: 460,00 PLN
+  Brutto / Do zapłaty: 2460,00 PLN
+
+Forma płatności: przelew bankowy
+Konto: PL 12 3456 7890 1234 5678 9012 3456
+Bank: PKO Bank Polski
+
+Uwagi: Płatność przelewem w ciągu 14 dni od daty wystawienia.
+
+Podpis wystawcy: _______________
+Podpis nabywcy: _______________

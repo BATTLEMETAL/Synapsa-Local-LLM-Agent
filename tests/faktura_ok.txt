@@ -1,0 +1,31 @@
+FAKTURA VAT Nr FV/2026/05/0001
+
+Wystawca:
+  TECH SOLUTIONS SP. Z O.O.
+  ul. Innowacyjna 15, 00-001 Warszawa
+  NIP: 123-456-78-90
+  KSeF: KS/2026/FV/0001234
+
+Nabywca:
+  BIURO RACHUNKOWE PRECYZJA SP. Z O.O.
+  ul. Ksiegowa 8/12, 30-001 Krakow
+  NIP: 987-654-32-10
+
+Data wystawienia: 10.05.2026
+Data sprzedazy: 09.05.2026
+Termin platnosci: 24.05.2026
+
+Lp. | Nazwa uslugi                    | Jed. | Il. | Cena netto | Netto   | VAT 23% | Brutto
+1   | Licencja systemu AI (miesiecznie)| mies.|  1  | 1 000,00   | 1000,00 | 230,00  | 1230,00
+
+Razem netto: 1 000,00 PLN
+VAT 23%:       230,00 PLN
+Brutto:      1 230,00 PLN
+
+Do zaplaty: 1 230,00 PLN
+
+Forma platnosci: przelew bankowy
+Konto: PL 12 3456 7890 1234 5678 9012 3456
+Bank: PKO Bank Polski
+
+Termin platnosci: 14 dni od wystawienia.
