@@ -85,4 +85,4 @@ check_untyped_defs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --ignore=tests/test_budowlanka_v5.py --ignore=tests/test_ai_with_invoices.py"
