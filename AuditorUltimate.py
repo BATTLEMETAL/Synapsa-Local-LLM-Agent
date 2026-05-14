@@ -42,12 +42,45 @@ class Colors:
 
 
 # --- MOCK TRITONA ---
-def setup_triton_mock():
-    dummy_code = "import sys\nclass M: __getattr__=lambda s,x:s\nsys.modules['triton']=M()"
-    exec(dummy_code)
+def setup_triton_mock() -> None:
+    """Install a lightweight triton stub so bitsandbytes imports don't crash on Windows.
+
+    The exec() approach does NOT work — exec runs in an isolated scope and the
+    sys.modules assignment is invisible to the outer interpreter.  We use
+    importlib / types instead, which modifies the global sys.modules correctly.
+    """
+    import importlib
+    import types
+
+    if "triton" in sys.modules:
+        return  # already patched — nothing to do
+
+    stub = types.ModuleType("triton")
+    stub.__spec__ = importlib.util.spec_from_loader("triton", loader=None)
+
+    # Make every attribute access on the stub return the stub itself
+    # so that `import triton; triton.language.something` doesn't crash.
+    class _PassthroughMeta(type):
+        def __getattr__(cls, _name: str):  # noqa: ANN001
+            return cls
+
+    class _Passthrough(metaclass=_PassthroughMeta):
+        def __getattr__(self, _name: str):  # noqa: ANN001
+            return self
+
+        def __call__(self, *_args, **_kwargs):  # noqa: ANN002, ANN003
+            return self
+
+    _pt = _Passthrough()
+    stub.__getattr__ = lambda _name: _pt  # type: ignore[assignment]
+
+    # Register the stub and common sub-modules
+    for _mod in ("triton", "triton.language", "triton.ops", "triton.runtime"):
+        sys.modules[_mod] = stub
 
 
 setup_triton_mock()
+
 
 # --- GEMINI SETUP ---
 genai.configure(api_key=GEMINI_API_KEY)

@@ -54,10 +54,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=os.environ.get("ALLOWED_ORIGINS", "http://localhost:8501").split(","),
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+
 
 # ---------------------------------------------------------------------------
 # Supported file types

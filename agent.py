@@ -325,9 +325,9 @@ if __name__ == "__main__":
     # Ścieżka do Twoich wytrenowanych adapterów
     ADAPTER_PATH = "moje_ai_adaptery"
 
-    # Ścieżka do projektu, który chcesz analizować
-    # UWAGA: Użyj r"" przed ścieżką
-    PROJECT_PATH = r"C:\Users\mz100\PycharmProjects\ProjektTestowy"
+    # Ścieżka do projektu — ustaw zmienną TARGET_PROJECT lub podaj ścieżkę tutaj
+    PROJECT_PATH = os.environ.get("TARGET_PROJECT", r"C:\Users\mz100\PycharmProjects\ProjektTestowy")
+
 
     try:
         agent = SmartAgent(ADAPTER_PATH, PROJECT_PATH)

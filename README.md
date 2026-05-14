@@ -1,7 +1,8 @@
 # Synapsa — Autonomous Local LLM Agent System
 
 [![CI](https://github.com/BATTLEMETAL/Synapsa-Local-LLM-Agent/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/BATTLEMETAL/Synapsa-Local-LLM-Agent/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
+
 [![Model](https://img.shields.io/badge/Model-Qwen%202.5%207B%20NF4-FF6F00?style=flat&logo=huggingface&logoColor=white)](https://huggingface.co/Qwen)
 [![Hardware](https://img.shields.io/badge/GPU-RTX%203060%2012GB-76B900?style=flat&logo=nvidia&logoColor=white)](https://github.com/BATTLEMETAL/Synapsa-Local-LLM-Agent/tree/master/triton_patches)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
