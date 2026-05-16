@@ -325,9 +325,14 @@ if __name__ == "__main__":
     # Ścieżka do Twoich wytrenowanych adapterów
     ADAPTER_PATH = "moje_ai_adaptery"
 
-    # Ścieżka do projektu — ustaw zmienną TARGET_PROJECT lub podaj ścieżkę tutaj
-    PROJECT_PATH = os.environ.get("TARGET_PROJECT", r"C:\Users\mz100\PycharmProjects\ProjektTestowy")
-
+    # Ścieżka do projektu — ustaw zmienną środowiskową TARGET_PROJECT
+    # Przykład: set TARGET_PROJECT=C:\\MojeProjekty\\MojAplikacja
+    PROJECT_PATH = os.environ.get("TARGET_PROJECT", "")
+    if not PROJECT_PATH or not os.path.exists(PROJECT_PATH):
+        print("⚠️  Ustaw zmienną środowiskową TARGET_PROJECT na ścieżkę projektu do analizy.")
+        print("    Przykład: set TARGET_PROJECT=C:\\MojeProjekty\\MojAplikacja")
+        PROJECT_PATH = os.getcwd()  # Fallback: aktualny katalog
+        print(f"ℹ️  Używam bieżącego katalogu: {PROJECT_PATH}")
 
     try:
         agent = SmartAgent(ADAPTER_PATH, PROJECT_PATH)
