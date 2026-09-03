@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import torch
 import warnings
@@ -90,14 +90,14 @@ def train_brain_night_mode():
         MODEL_NAME,
         quantization_config=bnb_config,
         device_map="auto",
-        trust_remote_code=True
+        trust_remote_code=False
     )
 
     model = prepare_model_for_kbit_training(model)
     model.gradient_checkpointing_enable()
     model.config.use_cache = False
 
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=False)
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
 

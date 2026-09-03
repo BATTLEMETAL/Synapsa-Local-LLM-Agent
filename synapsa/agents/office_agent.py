@@ -229,7 +229,7 @@ Zwróć raport w formacie JSON:
     def _offline_rule_audit(self, prompt: str, files: list) -> dict:
         """
         Audyt regułowy offline — działa nawet bez modelu AI.
-        Teraz też używa PyMuPDF do czytania faktury.
+        Teraz też używa PyMuPDF do czytania faktury, z pełną walidacją Fazy 3.
         """
         full_text = self._extract_files_content(files)
 
@@ -256,40 +256,50 @@ Zwróć raport w formacie JSON:
         ostrzezenia = []
         rekomendacje = []
 
+        from synapsa.agents.nip_validator import validate_nip as nip_checksum_validate
+
         if not re.search(r'faktura\s*vat', t):
-            bledy_formalne.append("Brak nagłówka 'FAKTURA VAT' — wymagany przez art. 106e ust. 1 pkt 1 ustawy o VAT")
+            bledy_formalne.append("Brak nagłówka 'FAKTURA VAT' — wymagany przez przepisy")
 
         has_date = bool(re.search(r'\d{1,2}[./]\d{1,2}[./]\d{4}', full_text))
         if not has_date:
-            bledy_formalne.append("Brak daty wystawienia faktury — wymagany element (art. 106e ust. 1 pkt 1)")
+            bledy_formalne.append("Brak daty wystawienia faktury")
 
-        has_nip_any = bool(re.search(r'nip\s*:?\s*([\d]{3}[-\s]?[\d]{3}[-\s]?[\d]{2}[-\s]?[\d]{2}|[\d]{10})', t))
-        if not has_nip_any:
-            bledy_formalne.append("Brak numeru NIP — wymagany identyfikator podatkowy (art. 106e ust. 1 pkt 3)")
-        else:
-            nip_matches = re.findall(r'nip\s*:?\s*([\d]{3}[-\s]?[\d]{3}[-\s]?[\d]{2}[-\s]?[\d]{2}|[\d]{10,13})', t)
-            for nip_raw in nip_matches:
-                nip_digits = re.sub(r'[^\d]', '', nip_raw)
-                if nip_digits and len(nip_digits) != 10:
-                    bledy_formalne.append(f"Nieprawidłowy NIP: '{nip_raw.strip()}' — NIP musi mieć dokładnie 10 cyfr")
-                    break
+        # NIP validation
+        nips = re.findall(r'nip\s*:?\s*([\d\-\s]{10,15})', t)
+        if not nips:
+            candidates = re.findall(r'\b\d{10}\b', full_text)
+            nips = [c for c in candidates if nip_checksum_validate(c)[0]]
 
-        has_payment_term = bool(re.search(r'termin\s+p[łl]atno|p[łl]atno\S*\s+do|zapłaty', t))
-        if not has_payment_term:
+        detected_nips = []
+        for nip_raw in nips:
+            nip_digits = re.sub(r'[^\d]', '', nip_raw)
+            if len(nip_digits) == 10:
+                is_ok, _ = nip_checksum_validate(nip_digits)
+                if is_ok:
+                    if nip_digits not in detected_nips:
+                        detected_nips.append(nip_digits)
+                else:
+                    bledy_formalne.append(f"Nieprawidłowa suma kontrolna NIP: {nip_raw.strip()}")
+            else:
+                bledy_formalne.append(f"Nieprawidłowy format NIP: {nip_raw.strip()} (wymagane 10 cyfr)")
+
+        seller_nip = detected_nips[0] if detected_nips else None
+        if not seller_nip:
+            bledy_formalne.append("Brak poprawnego numeru NIP sprzedawcy/nabywcy")
+
+        if not re.search(r'termin\s+p[łl]atno|p[łl]atno\S*\s+do|zapłaty', t):
             ostrzezenia.append("Brak terminu płatności — zalecany element faktury")
 
-        has_account = bool(re.search(r'(?:konto|numer\s+konta|iban|pl\d{26}|\d{26})', t))
-        if not has_account:
-            ostrzezenia.append("Brak numeru konta bankowego — wymagany przy płatności przelewem")
+        if not re.search(r'(?:konto|numer\s+konta|iban|pl\d{26}|\d{26})', t):
+            ostrzezenia.append("Brak numeru konta bankowego")
 
         vat_found = re.findall(r'vat\s*(\d+)\s*%', t)
         invalid_vat = [int(v) for v in vat_found if int(v) not in vat_rates_ok]
         if invalid_vat:
-            bledy_formalne.append(
-                f"Nieprawidłowa stawka VAT: {invalid_vat}% nie obowiązuje w {invoice_year}. "
-                f"Dozwolone: {vat_rates_ok}%"
-            )
+            bledy_formalne.append(f"Nieprawidłowa stawka VAT: {invalid_vat}% (dozwolone: {vat_rates_ok}%)")
 
+        # MPP
         amounts = re.findall(r'(?:brutto|do\s+zap[łl]aty|razem)[^\d]{0,20}([\d\s,.]+)\s*pln', t)
         max_amount = 0.0
         for a in amounts:
@@ -308,21 +318,64 @@ Zwróć raport w formacie JSON:
         elif split_threshold is not None and max_amount > split_threshold and has_mpp_note:
             rekomendacje.append(f"Dopisek MPP obecny ✓ — kwota {max_amount:,.2f} PLN > {split_threshold:,} PLN")
 
-        has_ksef = bool(re.search(r'ksef|ksej|pl\s*fa\s*\d', t))
-        if ksef_required and not has_ksef:
-            bledy_formalne.append(
-                "Brak numeru KSeF — OBOWIĄZKOWY od 01.02.2026 dla wszystkich podatników VAT"
-            )
-        elif invoice_year >= 2024 and not has_ksef:
-            ostrzezenia.append("Brak numeru KSeF — od 01.04.2026 obowiązkowy dla MŚP, zalecane wdrożenie już teraz")
+        # KSeF validation
+        ksef_matches = re.findall(r'\b\d{10}-\d{8}-[a-zA-Z0-9]{6}-[a-zA-Z0-9]{6}\b|\b\d{35}\b', t)
+        detected_ksef = ksef_matches[0] if ksef_matches else None
+        if detected_ksef:
+            clean_ksef = re.sub(r'[^a-zA-Z0-9]', '', detected_ksef)
+            if len(clean_ksef) == 35:
+                # KSeF structures verification (NIP & year match)
+                k_nip = clean_ksef[:10]
+                k_date = clean_ksef[10:18]
+                is_k_nip_valid, _ = nip_checksum_validate(k_nip)
+                if not is_k_nip_valid:
+                    bledy_formalne.append(f"Błąd KSeF: Niepoprawny NIP w KSeF: {k_nip}")
+                elif seller_nip and k_nip != seller_nip:
+                    bledy_formalne.append(f"Błąd KSeF: NIP z KSeF ({k_nip}) nie zgadza się ze sprzedawcą ({seller_nip})")
+                
+                try:
+                    k_year = int(k_date[:4])
+                    if k_year != invoice_year:
+                        bledy_formalne.append(f"Błąd KSeF: Rok z KSeF ({k_year}) nie zgadza się z rokiem faktury ({invoice_year})")
+                except ValueError:
+                    bledy_formalne.append(f"Błąd KSeF: Niepoprawny format daty w KSeF: {k_date}")
+            else:
+                rekomendacje.append(f"Wykryto numer KSeF w formacie tradycyjnym/mock: {detected_ksef}")
+        else:
+            if ksef_required:
+                bledy_formalne.append("Brak obowiązkowego numeru KSeF (wymagany od 01.02.2026)")
+            elif invoice_year >= 2024:
+                ostrzezenia.append("Brak numeru KSeF — zalecane wdrożenie")
 
-        # Sprawdzenie rachunkowe
+        # Sprawdzenie rachunkowe pozycji tabeli
+        from app_ksiegowosc import _extract_invoice_items as ext_items
+        try:
+            pozycje = ext_items(full_text)
+        except Exception:
+            pozycje = []
+
         netto_vals = re.findall(r'(?:netto|wartość\s+netto)[^\d]{0,20}([\d\s]+[,.]\d{2})', t)
         brutto_vals = re.findall(r'(?:brutto|do\s+zap[łl]aty)[^\d]{0,20}([\d\s]+[,.]\d{2})', t)
-        if netto_vals and brutto_vals and vat_found:
+        
+        netto, brutto = None, None
+        if netto_vals:
+            try: netto = float(re.sub(r'[\s]', '', netto_vals[0]).replace(',', '.'))
+            except ValueError: pass
+        if brutto_vals:
+            try: brutto = float(re.sub(r'[\s]', '', brutto_vals[0]).replace(',', '.'))
+            except ValueError: pass
+
+        if pozycje and netto and brutto:
+            total_netto = sum(p["netto"] for p in pozycje)
+            total_brutto = sum(p["brutto"] for p in pozycje)
+            if abs(total_netto - netto) > 5.0:
+                bledy_rachunkowe.append(f"Suma netto pozycji ({total_netto:,.2f}) nie zgadza się z wartością netto faktury ({netto:,.2f})")
+            if abs(total_brutto - brutto) > 5.0:
+                bledy_rachunkowe.append(f"Suma brutto pozycji ({total_brutto:,.2f}) nie zgadza się z wartością brutto faktury ({brutto:,.2f})")
+
+        # Sprawdzenie ogólne matematyczne
+        if netto and brutto and vat_found:
             try:
-                netto = float(re.sub(r'[\s]', '', netto_vals[0]).replace(',', '.'))
-                brutto = float(re.sub(r'[\s]', '', brutto_vals[0]).replace(',', '.'))
                 vat_rate = float(vat_found[0])
                 expected_brutto = round(netto * (1 + vat_rate / 100), 2)
                 if abs(expected_brutto - brutto) > 1.0:

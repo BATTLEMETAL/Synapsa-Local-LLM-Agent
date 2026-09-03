@@ -67,12 +67,15 @@ MATERIAL_RATIO = {
     "default": 0.50,
 }
 
-COUNTER_ID_FILE = "synapsa_workspace/invoice_counter.json"
+# Workspace katalog względem lokalizacji modułu — niezależny od CWD
+_MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+_WORKSPACE_DIR = os.path.abspath(os.path.join(_MODULE_DIR, "..", "..", "synapsa_workspace"))
+COUNTER_ID_FILE = os.path.join(_WORKSPACE_DIR, "invoice_counter.json")
 
 
 def _next_invoice_number() -> str:
     """Generuje kolejny numer faktury FV/RRRR/NNN."""
-    os.makedirs("synapsa_workspace", exist_ok=True)
+    os.makedirs(_WORKSPACE_DIR, exist_ok=True)
     counter = {"year": date.today().year, "n": 0}
     if os.path.exists(COUNTER_ID_FILE):
         try:
@@ -385,6 +388,14 @@ class ZlecenieProcessor:
             calc = self.calculator.calculate(parsed)
             kosztorys_text = self.calculator.format_kosztorys(calc)
 
+            # Walidacja zakresu cen — nierealne wartości generują ostrzeżenia
+            price_warnings = self._validate_price_range(parsed)
+            if price_warnings:
+                for w in price_warnings:
+                    logger.warning(w)
+                # Dodaj ostrzeżenia do kosztorysu (widoczne dla użytkownika)
+                kosztorys_text = "\n".join(price_warnings) + "\n\n" + kosztorys_text
+
             # KROK 3: Dane do faktury
             invoice_nr = _next_invoice_number()
             today = date.today().strftime("%d.%m.%Y")
@@ -417,6 +428,39 @@ class ZlecenieProcessor:
         except Exception as e:
             logger.error(f"ZlecenieProcessor error: {e}")
             return {"status": "error", "error": str(e)}
+
+    def _validate_price_range(self, parsed: dict) -> list:
+        """
+        Walidacja zakresu cen — zwraca listę ostrzeżeń (nie blokuje procesu).
+        Sprawdza czy ceny są realistyczne dla polskiego rynku budowlanego 2026.
+        """
+        warnings_out = []
+        price = parsed.get("cena_za_m2", 0.0)
+        area = parsed.get("metraz", 0.0)
+        unit = parsed.get("jednostka", "m²")
+
+        PRICE_MIN = 5.0     # poniżej 5 PLN/m² = nierealnie
+        PRICE_MAX = 8000.0  # powyżej 8000 PLN/m² = podejrzane
+        AREA_MAX = 50000.0  # 50 000 m² — ogromna inwestycja
+
+        if unit != "komplet" and price > 0:
+            if price < PRICE_MIN:
+                warnings_out.append(
+                    f"⚠️ Cena {price:.2f} PLN/m² wydaje się bardzo niska "
+                    f"(min. realna: {PRICE_MIN} PLN/m²). Sprawdź dane."
+                )
+            elif price > PRICE_MAX:
+                warnings_out.append(
+                    f"⚠️ Cena {price:,.2f} PLN/m² wydaje się bardzo wysoka "
+                    f"(max. typowa: {PRICE_MAX:,.0f} PLN/m²). Sprawdź dane."
+                )
+
+        if area > AREA_MAX:
+            warnings_out.append(
+                f"⚠️ Metraż {area:,.0f} m² wygląda podejrzanie dużo. Sprawdź wartość."
+            )
+
+        return warnings_out
 
     def _build_invoice_data(self, nr, date_str, parsed, calc, nabywca, sprzedawca, style_info) -> str:
         mpp_note = "MECHANIZM PODZIELONEJ PŁATNOŚCI" if calc["mpp_required"] else ""

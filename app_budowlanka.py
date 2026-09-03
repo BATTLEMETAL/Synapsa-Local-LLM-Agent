@@ -30,6 +30,21 @@ except ImportError as e:
 except Exception as e:
     IMPORT_ERROR = str(e)
 
+# Nowe moduły — niezależne od AI, zawsze dostępne
+try:
+    from synapsa.agents.nip_validator import validate_nip_from_field, validate_nip
+    _NIP_AVAILABLE = True
+except Exception:
+    _NIP_AVAILABLE = False
+
+try:
+    from synapsa.agents.invoice_history import InvoiceHistory
+    _history_db = InvoiceHistory()
+    _HISTORY_AVAILABLE = True
+except Exception:
+    _history_db = None
+    _HISTORY_AVAILABLE = False
+
 # === STRONA STREAMLIT ===
 st.set_page_config(
     page_title="Synapsa Budowlanka",
@@ -153,6 +168,14 @@ with tab_zlecenie:
         if not zlecenie_text or len(zlecenie_text.strip()) < 5:
             st.error("❌ Wpisz opis zlecenia.")
         else:
+            # Walidacja NIP — nieblokująca (ostrzeżenie, nie błąd)
+            if _NIP_AVAILABLE:
+                for _pole, _label in [(sprzedawca, "Sprzedawca"), (nabywca, "Nabywca")]:
+                    if _pole and _pole.strip():
+                        _valid, _msg, _nip = validate_nip_from_field(_pole)
+                        if _nip and not _valid:
+                            st.warning(f"⚠️ NIP {_label}: {_msg}")
+
             with st.spinner("🔄 Analizuję zlecenie..."):
                 try:
                     processor = ZlecenieProcessor()
@@ -162,6 +185,9 @@ with tab_zlecenie:
                         sprzedawca=sprzedawca,
                     )
                     st.session_state["zlecenie_result"] = result
+                    # Zapis do historii SQLite
+                    if _HISTORY_AVAILABLE and result.get("status") == "success":
+                        _history_db.save(result, sprzedawca=sprzedawca, nabywca=nabywca)
                 except NameError:
                     # ZlecenieProcessor nie załadowany — offline z dostępnym modułem
                     import sys, os
@@ -172,6 +198,8 @@ with tab_zlecenie:
                     processor = _ZP()
                     result = processor.process(zlecenie_text, nabywca=nabywca, sprzedawca=sprzedawca)
                     st.session_state["zlecenie_result"] = result
+                    if _HISTORY_AVAILABLE and result.get("status") == "success":
+                        _history_db.save(result, sprzedawca=sprzedawca, nabywca=nabywca)
                 except Exception as e:
                     st.error(f"❌ Błąd: {e}")
 
@@ -228,26 +256,60 @@ with tab_zlecenie:
                     mime="text/plain",
                     type="secondary",
                 )
+                # Przycisk PDF (używa reportlab z pyproject.toml)
+                try:
+                    from synapsa.agents.invoice_pdf import generate_invoice_pdf
+                    r_pdf = dict(r)
+                    r_pdf["nabywca"] = nabywca
+                    r_pdf["sprzedawca"] = sprzedawca
+                    pdf_bytes = generate_invoice_pdf(r_pdf)
+                    st.download_button(
+                        "📄 Pobierz fakturę (.pdf)",
+                        pdf_bytes,
+                        file_name=f"faktura_{r['invoice_nr'].replace('/', '-')}.pdf",
+                        mime="application/pdf",
+                        type="primary",
+                        key="pdf_download",
+                    )
+                except ImportError:
+                    st.info("💡 Zainstaluj `reportlab` aby pobrać PDF: `pip install reportlab`")
+                except Exception as _pdf_err:
+                    st.warning(f"⚠️ PDF niedostępny: {_pdf_err}")
 
-            # Historia zleceń w sesji
-            if "zlecenie_history" not in st.session_state:
-                st.session_state.zlecenie_history = []
-            existing = [h["nr"] for h in st.session_state.zlecenie_history]
-            if r["invoice_nr"] not in existing:
-                st.session_state.zlecenie_history.append({
-                    "nr": r["invoice_nr"],
-                    "typ": r["parse"]["typ_pracy"],
-                    "brutto": r["calc"]["brutto"],
-                    "data": r["invoice_date"],
-                })
+    # ─── Historia faktur (SQLite — persystentna) ────────────────────────────
+    st.divider()
+    if _HISTORY_AVAILABLE:
+        st.subheader("📂 Historia Faktur")
 
-    # Historia zleceń
-    history = st.session_state.get("zlecenie_history", [])
-    if history:
-        st.divider()
-        st.subheader("📁 Historia zleceń w tej sesji")
-        for h in reversed(history):
-            st.markdown(f"• **{h['nr']}** — {h['typ'].title()} — {h['brutto']:,.2f} PLN brutto — {h['data']}")
+        stats = _history_db.get_stats()
+        h_col1, h_col2, h_col3 = st.columns(3)
+        h_col1.metric("📄 Wszystkich faktur", stats.get("count", 0))
+        h_col2.metric("💰 Łączne brutto", f"{stats.get('total_brutto', 0):,.2f} PLN")
+        h_col3.metric("⚠️ Z MPP", stats.get("mpp_count", 0))
+
+        history_rows = _history_db.get_all(limit=50)
+        if history_rows:
+            with st.expander(f"Pokaż historię ({len(history_rows)} faktur)", expanded=False):
+                for hr in history_rows:
+                    hc1, hc2 = st.columns([5, 1])
+                    mpp_flag = " ⚠️ MPP" if hr.get("mpp") else ""
+                    hc1.markdown(
+                        f"**{hr['nr']}** — {str(hr.get('typ_pracy','')).title()} — "
+                        f"`{hr.get('brutto', 0):,.2f} PLN` brutto — {hr.get('invoice_date', '')}{mpp_flag}"
+                    )
+                    if hc2.button("🗑️", key=f"del_{hr['nr']}", help="Usuń z historii"):
+                        _history_db.delete(hr["nr"])
+                        st.rerun()
+        else:
+            st.info("Brak faktur w historii. Wystaw pierwszą fakturę powyżej.")
+    else:
+        # Fallback — historia w sesji jeśli SQLite niedostępny
+        history = st.session_state.get("zlecenie_history", [])
+        if history:
+            st.subheader("📁 Historia zleceń w tej sesji")
+            for h in reversed(history):
+                st.markdown(f"• **{h['nr']}** — {h['typ'].title()} — {h['brutto']:,.2f} PLN brutto — {h['data']}")
+
 
 # ─────────────────────────────────────────
 # TAB 1: ASYSTENT BUDOWLANY
@@ -278,13 +340,22 @@ with tab1:
             st.markdown(user_input)
 
         with st.chat_message("assistant"):
-            with st.spinner("Analizuję..."):
-                try:
-                    agent = st.session_state.construction_agent or ConstructionChatAgent()
-                    response = agent.chat(user_input)
-                except Exception as e:
-                    response = f"⚠️ Błąd agenta: {e}"
-            st.markdown(response)
+            try:
+                agent = st.session_state.construction_agent or ConstructionChatAgent()
+                # Streaming — tokeny pojawiają się na bieżąco (GPU lub offline word-by-word)
+                response = st.write_stream(agent.chat_stream(user_input))
+            except AttributeError:
+                # Fallback: stara wersja agenta bez chat_stream()
+                with st.spinner("Analizuję..."):
+                    try:
+                        agent2 = st.session_state.construction_agent or ConstructionChatAgent()
+                        response = agent2.chat(user_input)
+                    except Exception as e:
+                        response = f"⚠️ Błąd agenta: {e}"
+                st.markdown(response)
+            except Exception as e:
+                response = f"⚠️ Błąd: {e}"
+                st.markdown(response)
         st.session_state.chat_history.append({"role": "assistant", "content": response})
 
 # ─────────────────────────────────────────
@@ -329,8 +400,6 @@ with tab2:
                     st.error(f"Błąd: {res.get('message', 'Nieznany')}")
             except Exception as e:
                 st.error(f"❌ Błąd audytu: {e}")
-    elif st.button("🔍 Uruchom Audyt", key="audit_btn_disabled") if False else None:
-        pass
 
     if not uploaded_audit_files:
         st.info("👆 Wgraj pliki aby uruchomić audyt.")

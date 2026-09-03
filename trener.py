@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import torch
 import warnings
@@ -102,7 +102,7 @@ def train_brain():
         MODEL_NAME,
         quantization_config=bnb_config,
         device_map="auto",
-        trust_remote_code=True
+        trust_remote_code=False
     )
 
     # Przygotowanie do treningu w 4-bitach
@@ -113,7 +113,7 @@ def train_brain():
     model.config.use_cache = False
     # ---------------------------------------------------------
 
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=False)
     tokenizer.pad_token = tokenizer.eos_token  # Fix dla Qwen
     tokenizer.padding_side = "right"  # Fix dla treningu
 

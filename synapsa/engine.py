@@ -248,3 +248,115 @@ class SynapsaEngine:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
+
+    def generate_stream(self, prompt: str, max_tokens: int = None):
+        """
+        Generator tokenów kompatybilny z st.write_stream().
+        GPU: TextIteratorStreamer (transformers) w osobnym wątku.
+        Offline: yield wyrazów — efekt 'maszyny do pisania'.
+
+        Przykład Streamlit:
+            response = st.write_stream(engine.generate_stream(prompt))
+        """
+        if not self._loaded:
+            self._load_model()
+        max_tokens = max_tokens or self._max_new_tokens
+        if self.model and self.tokenizer:
+            yield from self._stream_with_model(prompt, max_tokens)
+        else:
+            yield from self._stream_offline(self._generate_offline(prompt))
+
+    def generate_chat_stream(self, system_message: str, user_message: str, max_tokens: int = None):
+        """
+        Generator tokenów ChatML — kompatybilny z st.write_stream().
+        GPU: TextIteratorStreamer. Offline: yield wyrazów.
+        """
+        if not self._loaded:
+            self._load_model()
+        max_tokens = max_tokens or self._max_new_tokens
+        if self.model and self.tokenizer:
+            yield from self._stream_chatml(system_message, user_message, max_tokens)
+        else:
+            offline_text = self._generate_offline(f"{system_message}\n\n{user_message}")
+            yield from self._stream_offline(offline_text)
+
+    def _stream_with_model(self, prompt: str, max_tokens: int):
+        """Streamuje tokeny z modelu przez TextIteratorStreamer."""
+        try:
+            import torch
+            from transformers import TextIteratorStreamer
+            from threading import Thread
+
+            full_prompt = (
+                f"Instrukcja: Jesteś asystentem budowlanym. Odpowiadaj zwieźle po polsku.\n"
+                f"{prompt}\nOdpowiedź:"
+            )
+            inputs = self.tokenizer([full_prompt], return_tensors="pt").to("cuda")
+            streamer = TextIteratorStreamer(
+                self.tokenizer, skip_prompt=True, skip_special_tokens=True
+            )
+            gen_kwargs = dict(
+                **inputs,
+                max_new_tokens=max_tokens,
+                streamer=streamer,
+                temperature=0.2,
+                do_sample=True,
+                repetition_penalty=1.1,
+                pad_token_id=self.tokenizer.eos_token_id,
+            )
+            thread = Thread(target=self.model.generate, kwargs=gen_kwargs)
+            thread.start()
+            for chunk in streamer:
+                if chunk:
+                    yield chunk
+            thread.join()
+        except Exception as e:
+            yield f"[Błąd streamowania: {e}]"
+
+    def _stream_chatml(self, system_message: str, user_message: str, max_tokens: int):
+        """Streamuje tokeny w formacie ChatML (Qwen 2.5)."""
+        try:
+            import torch
+            from transformers import TextIteratorStreamer
+            from threading import Thread
+
+            messages = [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message},
+            ]
+            formatted = self.tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+            inputs = self.tokenizer([formatted], return_tensors="pt").to("cuda")
+            streamer = TextIteratorStreamer(
+                self.tokenizer, skip_prompt=True, skip_special_tokens=True
+            )
+            gen_kwargs = dict(
+                **inputs,
+                max_new_tokens=max_tokens,
+                streamer=streamer,
+                temperature=0.2,
+                do_sample=True,
+                repetition_penalty=1.1,
+                pad_token_id=self.tokenizer.eos_token_id,
+            )
+            thread = Thread(target=self.model.generate, kwargs=gen_kwargs)
+            thread.start()
+            for chunk in streamer:
+                if chunk:
+                    yield chunk
+            thread.join()
+        except Exception as e:
+            yield f"[Błąd ChatML stream: {e}]"
+
+    def _stream_offline(self, text: str):
+        """
+        Symuluje streaming w trybie offline — yield wyrazów.
+        Daje efekt 'maszyny do pisania' bez modelu AI.
+        """
+        if not text:
+            yield "Synapsa AI — tryb demonstracyjny. Zainstaluj model AI dla pełnej funkcjonalności."
+            return
+        words = text.split(" ")
+        for i, word in enumerate(words):
+            yield word + (" " if i < len(words) - 1 else "")

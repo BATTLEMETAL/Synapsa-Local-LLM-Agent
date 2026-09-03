@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import torch
 import warnings
@@ -80,11 +80,11 @@ def main():
             BASE_MODEL,
             quantization_config=bnb_config,
             device_map="auto",
-            trust_remote_code=True
+            trust_remote_code=False
         )
 
         # Ładowanie tokenizera
-        tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=False)
 
         # Ładowanie Twojego mózgu (Adaptery LoRA)
         if os.path.exists(ADAPTER_PATH):

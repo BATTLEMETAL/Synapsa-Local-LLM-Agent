@@ -11,7 +11,15 @@ except ImportError:
 import torch
 import warnings
 import re
-from config import settings
+
+try:
+    from config import settings
+    _BASE_MODEL = settings.BASE_MODEL or os.getenv("MODEL_PATH", "unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit")
+    _ADAPTER_PATH = getattr(settings, "ADAPTERS", None) or os.getenv("ADAPTER_PATH", "moje_ai_adaptery")
+except Exception:
+    # config.py niedostępny lub pydantic_settings nie zainstalowane — fallback na env
+    _BASE_MODEL = os.getenv("MODEL_PATH", "unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit")
+    _ADAPTER_PATH = os.getenv("ADAPTER_PATH", "moje_ai_adaptery")
 
 warnings.filterwarnings("ignore")
 
@@ -33,8 +41,8 @@ class SynapsaEngine:
             return
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model_path = settings.BASE_MODEL
-        self.adapter_path = getattr(settings, "ADAPTERS", os.getenv("ADAPTER_PATH", "moje_ai_adaptery"))
+        self.model_path = _BASE_MODEL
+        self.adapter_path = _ADAPTER_PATH
         
         self.model = None
         self.tokenizer = None
@@ -83,8 +91,9 @@ class SynapsaEngine:
             print(f"✅ Silnik docelowy Synapsy jest gotowy na akceleratorze: {torch.cuda.get_device_name(0)}")
 
         except Exception as e:
-            print(f"❌ KRYTYCZNY BŁĄD SILNIKA: {e}")
-            sys.exit(1)
+            # ZMIANA: sys.exit(1) → raise RuntimeError
+            # sys.exit() ubijał cały proces Streamlit — teraz propagujemy błąd normalnie
+            raise RuntimeError(f"Błąd ładowania silnika AI: {e}") from e
 
     def generate_raw(self, prompt, max_tokens=2048, temperature=0.2):
         """Generuje surową odpowiedź z modelu po upewnieniu się, że siedzi w pamięci."""

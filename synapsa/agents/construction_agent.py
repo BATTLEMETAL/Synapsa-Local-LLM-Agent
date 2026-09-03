@@ -170,3 +170,54 @@ ODPOWIEDŹ:"""
             "• Murowania i konstrukcji\n\n"
             f"Zapytaj konkretnie np.: *'Ile kosztuje ocieplenie 200m2 styropianem 15cm?'*"
         )
+
+    def chat_stream(self, user_message: str):
+        """
+        Generator tokenów — kompatybilny z st.write_stream().
+        GPU: używa engine.generate_stream() z TextIteratorStreamer.
+        Offline: yield wyrazów odpowiedzi.
+
+        Przykład Streamlit:
+            response = st.write_stream(agent.chat_stream(pytanie))
+        """
+        # 1. Spróbuj offline bazy najpierw
+        offline_match = self._offline_answer(user_message)
+        has_offline = offline_match and "🏗️ **Asystent Budowlany**" not in offline_match
+
+        # 2. Brak engine — streamuj offline
+        if not self.engine:
+            yield from self._yield_words(offline_match)
+            return
+
+        # 3. Mamy engine — streamuj z AI
+        if self.engine.model and self.engine.tokenizer:
+            knowledge_ctx = self._format_knowledge_context()
+            prompt = (
+                f"Jesteś Asystentem Budowlanym AI ('Synapsa Budowlanka').\n"
+                f"Specjalizujesz się w kosztorysowaniu prac budowlanych w Polsce.\n\n"
+                f"BAZA CENOWA (aktualne ceny rynkowe 2026):\n{knowledge_ctx}\n\n"
+                f"PYTANIE KLIENTA: {user_message}\n\n"
+                f"Odpowiedz konkretnie po polsku, podaj ceny + materiały + robociznę osobno:"
+            )
+            yield from self.engine.generate_stream(prompt, max_tokens=800)
+        else:
+            # Offline fallback z efektem streamowania
+            text = self.engine.generate(self._build_prompt(user_message), max_tokens=800)
+            enriched = self._enrich_with_calculation(user_message, text)
+            yield from self._yield_words(enriched)
+
+    def _build_prompt(self, user_message: str) -> str:
+        """Buduje prompt dla generate() (non-streaming)."""
+        knowledge_ctx = self._format_knowledge_context()
+        return (
+            f"Jesteś Asystentem Budowlanym AI.\n"
+            f"BAZA CENOWA 2026:\n{knowledge_ctx}\n\n"
+            f"PYTANIE: {user_message}\n\nODPOWIEDŹ:"
+        )
+
+    @staticmethod
+    def _yield_words(text: str):
+        """Pomocniczy generator: yield wyrazów z tekstu."""
+        words = text.split(" ")
+        for i, word in enumerate(words):
+            yield word + (" " if i < len(words) - 1 else "")

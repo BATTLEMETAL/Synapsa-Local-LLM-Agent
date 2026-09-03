@@ -12,9 +12,17 @@ from synapsa.agents.accountant_agent import AccountantAgent
 
 class MockEngineAccountant:
     def generate(self, prompt, max_tokens=100):
-        if "Profil Stylu" in prompt:
+        if "Profil Stylu" in prompt or "Styl" in prompt:
             return "Styl: Logo centralnie. Stopka z RODO. Termin płatności 14 dni."
-        if "Wystaw fakturę" in prompt:
+        if "Wystaw fakturę" in prompt or "DANE DO FAKTURY" in prompt:
+            return "FAKTURA VAT nr 1/2026\nSprzedawca: ...\n(Zgodnie ze stylem: Logo centralnie...)"
+        return "Generic"
+
+    def generate_chat(self, system_msg, user_msg, max_tokens=100):
+        """Symuluje generate_chat() — wymagane po modernizacji AccountantAgent."""
+        if "Profil Stylu" in user_msg or "TREŚĆ FAKTUR" in user_msg:
+            return "Styl: Logo centralnie. Stopka z RODO. Termin płatności 14 dni."
+        if "DANE DO FAKTURY" in user_msg:
             return "FAKTURA VAT nr 1/2026\nSprzedawca: ...\n(Zgodnie ze stylem: Logo centralnie...)"
         return "Generic"
 

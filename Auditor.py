@@ -1,3 +1,7 @@
+﻿# DEPRECATED — Ten plik jest duplikatem logiki z synapsa/engine.py
+# Nie uzywac bezposrednio. Zachowany tylko dla referencji historycznej.
+# Uzywaj: from synapsa.engine import SynapsaEngine
+
 import os
 import sys
 import re

@@ -21,9 +21,10 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 # ==========================================
 # 2. ŚCIEŻKI I PRIORYTETY
 # ==========================================
+_user_profile = os.environ.get("USERPROFILE") or os.path.expanduser("~")
 PATHS_CONFIG = {
-    "Android": r"C:\Users\mz100\AndroidStudioProjects",
-    "Python": r"C:\Users\mz100\PycharmProjects",
+    "Android": os.path.join(_user_profile, "AndroidStudioProjects"),
+    "Python": os.path.join(_user_profile, "PycharmProjects"),
 }
 
 # Projekty priorytetowe (SalesBot usunięty, uczy się najpierw innych)
